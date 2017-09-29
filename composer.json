@@ -1,0 +1,21 @@
+{
+  "name": "wfxiang08/geoip",
+  "description": "geip ip rpc service",
+  "keywords": [
+    "framework",
+    "rpc",
+    "thrift"
+  ],
+  "homepage": "https://github.com/wfxiang08/url_manager.git",
+  "type": "project",
+  "license": "BSD-3-Clause",
+  "minimum-stability": "stable",
+  "require": {
+    "wfxiang08/thrift_rpc_php": ">=0.2.8-stable"
+  },
+  "autoload": {
+    "files": [
+      "autoload.php"
+    ]
+  }
+}
