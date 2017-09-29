@@ -35,6 +35,11 @@ class Request {
       'type' => TType::STRING,
       ),
     3 => array(
+      'var' => 'client',
+      'isRequired' => false,
+      'type' => TType::STRING,
+      ),
+    4 => array(
       'var' => 'query_params',
       'isRequired' => false,
       'type' => TType::MAP,
@@ -47,7 +52,7 @@ class Request {
         'type' => TType::STRING,
         ),
       ),
-    4 => array(
+    5 => array(
       'var' => 'authorization',
       'isRequired' => false,
       'type' => TType::STRING,
@@ -62,6 +67,10 @@ class Request {
    * @var string
    */
   public $request_uri = null;
+  /**
+   * @var string
+   */
+  public $client = null;
   /**
    * @var array
    */
@@ -78,6 +87,9 @@ class Request {
       }
       if (isset($vals['request_uri'])) {
         $this->request_uri = $vals['request_uri'];
+      }
+      if (isset($vals['client'])) {
+        $this->client = $vals['client'];
       }
       if (isset($vals['query_params'])) {
         $this->query_params = $vals['query_params'];
@@ -122,6 +134,13 @@ class Request {
           }
           break;
         case 3:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->client);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 4:
           if ($ftype == TType::MAP) {
             $this->query_params = array();
             $_size0 = 0;
@@ -141,7 +160,7 @@ class Request {
             $xfer += $input->skip($ftype);
           }
           break;
-        case 4:
+        case 5:
           if ($ftype == TType::STRING) {
             $xfer += $input->readString($this->authorization);
           } else {
@@ -171,11 +190,16 @@ class Request {
       $xfer += $output->writeString($this->request_uri);
       $xfer += $output->writeFieldEnd();
     }
+    if ($this->client !== null) {
+      $xfer += $output->writeFieldBegin('client', TType::STRING, 3);
+      $xfer += $output->writeString($this->client);
+      $xfer += $output->writeFieldEnd();
+    }
     if ($this->query_params !== null) {
       if (!is_array($this->query_params)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('query_params', TType::MAP, 3);
+      $xfer += $output->writeFieldBegin('query_params', TType::MAP, 4);
       {
         $output->writeMapBegin(TType::STRING, TType::STRING, count($this->query_params));
         {
@@ -190,7 +214,7 @@ class Request {
       $xfer += $output->writeFieldEnd();
     }
     if ($this->authorization !== null) {
-      $xfer += $output->writeFieldBegin('authorization', TType::STRING, 4);
+      $xfer += $output->writeFieldBegin('authorization', TType::STRING, 5);
       $xfer += $output->writeString($this->authorization);
       $xfer += $output->writeFieldEnd();
     }
