@@ -17,6 +17,129 @@ use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
 
+class OAuthUser {
+  static $isValidate = false;
+
+  static $_TSPEC = array(
+    1 => array(
+      'var' => 'user_id',
+      'isRequired' => false,
+      'type' => TType::I64,
+      ),
+    2 => array(
+      'var' => 'oauth_key',
+      'isRequired' => false,
+      'type' => TType::STRING,
+      ),
+    3 => array(
+      'var' => 'oauth_secret',
+      'isRequired' => false,
+      'type' => TType::STRING,
+      ),
+    );
+
+  /**
+   * @var int
+   */
+  public $user_id = null;
+  /**
+   * @var string
+   */
+  public $oauth_key = null;
+  /**
+   * @var string
+   */
+  public $oauth_secret = null;
+
+  public function __construct($vals=null) {
+    if (is_array($vals)) {
+      if (isset($vals['user_id'])) {
+        $this->user_id = $vals['user_id'];
+      }
+      if (isset($vals['oauth_key'])) {
+        $this->oauth_key = $vals['oauth_key'];
+      }
+      if (isset($vals['oauth_secret'])) {
+        $this->oauth_secret = $vals['oauth_secret'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'OAuthUser';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::I64) {
+            $xfer += $input->readI64($this->user_id);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->oauth_key);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->oauth_secret);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('OAuthUser');
+    if ($this->user_id !== null) {
+      $xfer += $output->writeFieldBegin('user_id', TType::I64, 1);
+      $xfer += $output->writeI64($this->user_id);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->oauth_key !== null) {
+      $xfer += $output->writeFieldBegin('oauth_key', TType::STRING, 2);
+      $xfer += $output->writeString($this->oauth_key);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->oauth_secret !== null) {
+      $xfer += $output->writeFieldBegin('oauth_secret', TType::STRING, 3);
+      $xfer += $output->writeString($this->oauth_secret);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
 /**
  * 输入和输出的结果
  */
@@ -35,11 +158,6 @@ class Request {
       'type' => TType::STRING,
       ),
     3 => array(
-      'var' => 'client',
-      'isRequired' => false,
-      'type' => TType::STRING,
-      ),
-    4 => array(
       'var' => 'query_params',
       'isRequired' => false,
       'type' => TType::MAP,
@@ -52,7 +170,7 @@ class Request {
         'type' => TType::STRING,
         ),
       ),
-    5 => array(
+    4 => array(
       'var' => 'authorization',
       'isRequired' => false,
       'type' => TType::STRING,
@@ -67,10 +185,6 @@ class Request {
    * @var string
    */
   public $request_uri = null;
-  /**
-   * @var string
-   */
-  public $client = null;
   /**
    * @var array
    */
@@ -87,9 +201,6 @@ class Request {
       }
       if (isset($vals['request_uri'])) {
         $this->request_uri = $vals['request_uri'];
-      }
-      if (isset($vals['client'])) {
-        $this->client = $vals['client'];
       }
       if (isset($vals['query_params'])) {
         $this->query_params = $vals['query_params'];
@@ -134,13 +245,6 @@ class Request {
           }
           break;
         case 3:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->client);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 4:
           if ($ftype == TType::MAP) {
             $this->query_params = array();
             $_size0 = 0;
@@ -160,7 +264,7 @@ class Request {
             $xfer += $input->skip($ftype);
           }
           break;
-        case 5:
+        case 4:
           if ($ftype == TType::STRING) {
             $xfer += $input->readString($this->authorization);
           } else {
@@ -190,16 +294,11 @@ class Request {
       $xfer += $output->writeString($this->request_uri);
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->client !== null) {
-      $xfer += $output->writeFieldBegin('client', TType::STRING, 3);
-      $xfer += $output->writeString($this->client);
-      $xfer += $output->writeFieldEnd();
-    }
     if ($this->query_params !== null) {
       if (!is_array($this->query_params)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('query_params', TType::MAP, 4);
+      $xfer += $output->writeFieldBegin('query_params', TType::MAP, 3);
       {
         $output->writeMapBegin(TType::STRING, TType::STRING, count($this->query_params));
         {
@@ -214,7 +313,7 @@ class Request {
       $xfer += $output->writeFieldEnd();
     }
     if ($this->authorization !== null) {
-      $xfer += $output->writeFieldBegin('authorization', TType::STRING, 5);
+      $xfer += $output->writeFieldBegin('authorization', TType::STRING, 4);
       $xfer += $output->writeString($this->authorization);
       $xfer += $output->writeFieldEnd();
     }
@@ -243,9 +342,10 @@ class ParseResult {
       'type' => TType::STRING,
       ),
     3 => array(
-      'var' => 'user_id',
+      'var' => 'user_auth',
       'isRequired' => false,
-      'type' => TType::I64,
+      'type' => TType::STRUCT,
+      'class' => '\UrlManager\Services\OAuthUser',
       ),
     4 => array(
       'var' => 'message',
@@ -276,9 +376,9 @@ class ParseResult {
    */
   public $route = null;
   /**
-   * @var int
+   * @var \UrlManager\Services\OAuthUser
    */
-  public $user_id = null;
+  public $user_auth = null;
   /**
    * @var string
    */
@@ -296,8 +396,8 @@ class ParseResult {
       if (isset($vals['route'])) {
         $this->route = $vals['route'];
       }
-      if (isset($vals['user_id'])) {
-        $this->user_id = $vals['user_id'];
+      if (isset($vals['user_auth'])) {
+        $this->user_auth = $vals['user_auth'];
       }
       if (isset($vals['message'])) {
         $this->message = $vals['message'];
@@ -342,8 +442,9 @@ class ParseResult {
           }
           break;
         case 3:
-          if ($ftype == TType::I64) {
-            $xfer += $input->readI64($this->user_id);
+          if ($ftype == TType::STRUCT) {
+            $this->user_auth = new \UrlManager\Services\OAuthUser();
+            $xfer += $this->user_auth->read($input);
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -398,9 +499,12 @@ class ParseResult {
       $xfer += $output->writeString($this->route);
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->user_id !== null) {
-      $xfer += $output->writeFieldBegin('user_id', TType::I64, 3);
-      $xfer += $output->writeI64($this->user_id);
+    if ($this->user_auth !== null) {
+      if (!is_object($this->user_auth)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('user_auth', TType::STRUCT, 3);
+      $xfer += $this->user_auth->write($output);
       $xfer += $output->writeFieldEnd();
     }
     if ($this->message !== null) {
